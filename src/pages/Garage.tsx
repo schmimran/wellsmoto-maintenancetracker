@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Motorcycle } from 'lucide-react';
+import { Bike } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import EmptyState from '@/components/EmptyState';
 import FloatingActionButton from '@/components/FloatingActionButton';
