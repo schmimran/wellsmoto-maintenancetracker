@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 type LogoProps = {
   size?: 'sm' | 'md' | 'lg';
@@ -14,16 +15,13 @@ const Logo = ({ size = 'md', withText = false }: LogoProps) => {
   };
 
   return (
-    <div className={`flex ${withText ? 'flex-col items-center' : ''}`}>
-      <div className={`${sizeStyles[size]} relative rounded-full bg-wells-darkBlue border-2 border-[#a6a48a]`}>
-        <div className="absolute inset-0 flex items-center justify-center">
-          {/* Stylized WM in gold/green colors */}
-          <div className="text-[#a6a48a] font-bold text-xl">WM</div>
-        </div>
-        {/* Red lightning bolt overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-wells-red text-2xl font-bold transform -rotate-12">⚡</div>
-        </div>
+    <Link to="/" className={`flex ${withText ? 'flex-col items-center' : ''}`}>
+      <div className={`${sizeStyles[size]} relative`}>
+        <img 
+          src="/lovable-uploads/8f03e4a2-6676-4a8f-9800-186ae355b255.png" 
+          alt="Wells Moto Logo" 
+          className="w-full h-full object-contain"
+        />
       </div>
       
       {withText && (
@@ -32,7 +30,7 @@ const Logo = ({ size = 'md', withText = false }: LogoProps) => {
           <p className="text-sm text-gray-500">Your Motorcycle Maintenance Companion</p>
         </div>
       )}
-    </div>
+    </Link>
   );
 };
 
