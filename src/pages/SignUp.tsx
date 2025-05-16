@@ -18,13 +18,14 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 
+// The issue is in the schema definition - we need to use boolean() with refine instead of literal(true)
 const signupSchema = z.object({
   email: z.string().email('Please enter a valid email'),
   name: z.string().min(2, 'Display name must be at least 2 characters'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
-  eulaAccepted: z.literal(true, {
-    errorMap: () => ({ message: "You must accept the EULA to create an account" }),
+  eulaAccepted: z.boolean().refine(val => val === true, {
+    message: "You must accept the EULA to create an account",
   }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
@@ -42,7 +43,7 @@ const SignUp = () => {
       name: '',
       password: '',
       confirmPassword: '',
-      eulaAccepted: false,
+      eulaAccepted: false, // This is okay now with our updated schema
     },
   });
 
