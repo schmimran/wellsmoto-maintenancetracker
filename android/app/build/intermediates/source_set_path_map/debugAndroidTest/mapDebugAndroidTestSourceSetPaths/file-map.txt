@@ -1,6 +1,0 @@
-com.wellsmoto.maintenancetracker.test.app-tracing-1.2.0-0 /Users/imran/.gradle/caches/8.11.1/transforms/6a92744bc466cd9962d55638a00eafef/transformed/tracing-1.2.0/res
-com.wellsmoto.maintenancetracker.test.app-core-1.6.1-1 /Users/imran/.gradle/caches/8.11.1/transforms/81f2ccfabd130e974f2e848d4852436a/transformed/core-1.6.1/res
-com.wellsmoto.maintenancetracker.test.app-androidTest-2 /Users/imran/GitRepos/wellsmoto-maintenancetracker/android/app/build/generated/res/resValues/androidTest/debug
-com.wellsmoto.maintenancetracker.test.app-mergeDebugAndroidTestResources-3 /Users/imran/GitRepos/wellsmoto-maintenancetracker/android/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
-com.wellsmoto.maintenancetracker.test.app-mergeDebugAndroidTestResources-4 /Users/imran/GitRepos/wellsmoto-maintenancetracker/android/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
-com.wellsmoto.maintenancetracker.test.app-debugAndroidTest-5 /Users/imran/GitRepos/wellsmoto-maintenancetracker/android/app/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources

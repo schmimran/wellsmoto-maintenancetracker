@@ -1,3 +1,0 @@
-com.wellsmoto.maintenancetracker.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme
