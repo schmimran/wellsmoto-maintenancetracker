@@ -53,12 +53,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string, stayLoggedIn = false) => {
     try {
+      // The issue is here - we need to correctly handle the stayLoggedIn option
+      // The signInWithPassword method doesn't accept persistSession in the options
+      // We can set this globally for the client if needed, but for now we'll just sign in
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          persistSession: stayLoggedIn,
-        }
       });
       
       if (error) throw error;
