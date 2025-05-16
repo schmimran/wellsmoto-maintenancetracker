@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,11 +11,19 @@ type AuthContextType = {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
-  authInitialized: boolean; // Flag to track when initial auth check is complete
+  authInitialized: boolean; 
   signIn: (email: string, password: string, stayLoggedIn?: boolean) => Promise<void>;
   signUp: (email: string, password: string, displayName: string, eulaAccepted: boolean) => Promise<void>;
   signOut: () => Promise<void>;
-  updateProfile: (data: { display_name?: string, email?: string, avatar_url?: string }) => Promise<void>;
+  updateProfile: (data: { 
+    display_name?: string, 
+    email?: string, 
+    avatar_url?: string,
+    notifications?: boolean,
+    distance_unit?: string,
+    dark_mode?: boolean,
+    maintenance_reminders?: boolean
+  }) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -186,7 +193,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const updateProfile = async (data: { display_name?: string, email?: string, avatar_url?: string }) => {
+  const updateProfile = async (data: { 
+    display_name?: string, 
+    email?: string, 
+    avatar_url?: string,
+    notifications?: boolean,
+    distance_unit?: string,
+    dark_mode?: boolean,
+    maintenance_reminders?: boolean
+  }) => {
     try {
       if (!user) throw new Error('User not authenticated');
 

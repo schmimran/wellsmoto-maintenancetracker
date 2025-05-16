@@ -13,31 +13,43 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          dark_mode: boolean | null
           display_name: string | null
+          distance_unit: string | null
           email: string | null
           eula_accepted: boolean
           eula_accepted_at: string | null
           id: string
+          maintenance_reminders: boolean | null
+          notifications: boolean | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          dark_mode?: boolean | null
           display_name?: string | null
+          distance_unit?: string | null
           email?: string | null
           eula_accepted?: boolean
           eula_accepted_at?: string | null
           id: string
+          maintenance_reminders?: boolean | null
+          notifications?: boolean | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          dark_mode?: boolean | null
           display_name?: string | null
+          distance_unit?: string | null
           email?: string | null
           eula_accepted?: boolean
           eula_accepted_at?: string | null
           id?: string
+          maintenance_reminders?: boolean | null
+          notifications?: boolean | null
           updated_at?: string
         }
         Relationships: []

@@ -8,6 +8,7 @@ import EditProfileModal from '@/components/EditProfileModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserPreferences } from '@/contexts/UserPreferencesContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -16,10 +17,7 @@ type Profile = Database['public']['Tables']['profiles']['Row'];
 const Profile = () => {
   const { toast } = useToast();
   const { user, signOut } = useAuth();
-  const [notifications, setNotifications] = useState(true);
-  const [distanceUnit, setDistanceUnit] = useState('miles');
-  const [darkMode, setDarkMode] = useState(false);
-  const [maintenanceReminders, setMaintenanceReminders] = useState(true);
+  const { preferences, updatePreferences, isLoading: preferencesLoading } = useUserPreferences();
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -69,11 +67,26 @@ const Profile = () => {
     }
   };
 
-  const handleSaveSettings = () => {
-    toast({
-      title: "Settings saved",
-      description: "Your preferences have been updated",
-    });
+  const handleSaveSettings = async () => {
+    try {
+      await updatePreferences({
+        notifications: preferences.notifications,
+        distanceUnit: preferences.distanceUnit,
+        darkMode: preferences.darkMode,
+        maintenanceReminders: preferences.maintenanceReminders
+      });
+      
+      toast({
+        title: "Settings saved",
+        description: "Your preferences have been updated",
+      });
+    } catch (error) {
+      toast({
+        title: "Error saving settings",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   const navigateToTerms = () => {
@@ -121,7 +134,7 @@ const Profile = () => {
             <h2 className="text-xl font-bold mb-1">
               {isLoading ? 'Loading...' : userProfile?.display_name || user?.email || 'User'}
             </h2>
-            <p className="text-gray-500 mb-4">{user?.email || 'No email available'}</p>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">{user?.email || 'No email available'}</p>
             <div className="flex flex-col space-y-2 w-full max-w-xs">
               <ActionButton onClick={handleEditProfile}>Edit Profile</ActionButton>
               <ActionButton 
@@ -141,8 +154,8 @@ const Profile = () => {
           <ToggleSwitch
             id="notifications"
             label="Notifications"
-            isChecked={notifications}
-            onChange={setNotifications}
+            isChecked={preferences.notifications}
+            onChange={(checked) => updatePreferences({ notifications: checked })}
           />
           
           <div className="py-4 border-b border-gray-200 dark:border-gray-700">
@@ -150,14 +163,14 @@ const Profile = () => {
               <span>Distance Unit</span>
               <div className="flex bg-wells-lightGray rounded-lg overflow-hidden">
                 <button
-                  className={`px-4 py-1 ${distanceUnit === 'miles' ? 'bg-white dark:bg-wells-darkGray shadow-sm' : ''}`}
-                  onClick={() => setDistanceUnit('miles')}
+                  className={`px-4 py-1 ${preferences.distanceUnit === 'miles' ? 'bg-white dark:bg-wells-darkGray shadow-sm' : ''}`}
+                  onClick={() => updatePreferences({ distanceUnit: 'miles' })}
                 >
                   Miles
                 </button>
                 <button
-                  className={`px-4 py-1 ${distanceUnit === 'kilometers' ? 'bg-white dark:bg-wells-darkGray shadow-sm' : ''}`}
-                  onClick={() => setDistanceUnit('kilometers')}
+                  className={`px-4 py-1 ${preferences.distanceUnit === 'kilometers' ? 'bg-white dark:bg-wells-darkGray shadow-sm' : ''}`}
+                  onClick={() => updatePreferences({ distanceUnit: 'kilometers' })}
                 >
                   Kilometers
                 </button>
@@ -168,15 +181,15 @@ const Profile = () => {
           <ToggleSwitch
             id="darkMode"
             label="Dark Mode"
-            isChecked={darkMode}
-            onChange={setDarkMode}
+            isChecked={preferences.darkMode}
+            onChange={(checked) => updatePreferences({ darkMode: checked })}
           />
           
           <ToggleSwitch
             id="maintenanceReminders"
             label="Maintenance Reminders"
-            isChecked={maintenanceReminders}
-            onChange={setMaintenanceReminders}
+            isChecked={preferences.maintenanceReminders}
+            onChange={(checked) => updatePreferences({ maintenanceReminders: checked })}
           />
 
           <div className="mt-4 flex justify-end">

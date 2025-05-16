@@ -8,11 +8,13 @@ import SegmentedControl from '@/components/SegmentedControl';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useUserPreferences } from '@/contexts/UserPreferencesContext';
 
 const Garage = () => {
   const [viewType, setViewType] = useState('cards');
   const [motorcycles, setMotorcycles] = useState<any[]>([]);
   const { user, authInitialized } = useAuth();
+  const { preferences } = useUserPreferences();
   const navigate = useNavigate();
   
   // Ensure we're authenticated when this page renders
@@ -47,7 +49,7 @@ const Garage = () => {
           <EmptyState
             icon={<img src="/motorcycle-icon.png" alt="Motorcycle" className="w-149 h-113 opacity-50" />}
             title="Your garage is empty"
-            description="Add your first motorcycle to get started"
+            description={`Add your first motorcycle to get started (${preferences.distanceUnit})`}
           />
         ) : (
           <div className="w-full">
