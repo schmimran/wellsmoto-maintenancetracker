@@ -117,3 +117,4 @@ export const exitApp = () => {
     App.exitApp();
   }
 };
+
