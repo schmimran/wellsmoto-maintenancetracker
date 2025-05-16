@@ -73,17 +73,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string, stayLoggedIn = false) => {
     try {
-      // Fix: Merge all options into a single object parameter
+      // Update: Fixed options structure for signInWithPassword
       const { error } = await supabase.auth.signInWithPassword({
         email,
-        password,
-        options: {
-          // Include the persistence option inside the main object
-          persistSession: stayLoggedIn,
-        }
+        password
       });
       
       if (error) throw error;
+      
+      // Handle session persistence separately if needed
+      if (stayLoggedIn) {
+        // Set local storage option for persistence if needed
+        localStorage.setItem('supabase.auth.persistence', 'local');
+      }
     } catch (error: any) {
       toast.error(error.message || 'Error signing in');
       throw error;
