@@ -9,6 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      motorcycles: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          insurance_doc_url: string | null
+          make: string
+          model: string
+          nickname: string
+          odometer_miles: number
+          registration_doc_url: string | null
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          insurance_doc_url?: string | null
+          make: string
+          model: string
+          nickname: string
+          odometer_miles: number
+          registration_doc_url?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          insurance_doc_url?: string | null
+          make?: string
+          model?: string
+          nickname?: string
+          odometer_miles?: number
+          registration_doc_url?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

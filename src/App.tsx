@@ -8,6 +8,9 @@ import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Garage from "./pages/Garage";
+import AddMotorcycle from "./pages/AddMotorcycle";
+import EditMotorcycle from "./pages/EditMotorcycle";
+import MotorcycleDetail from "./pages/MotorcycleDetail";
 import Maintenance from "./pages/Maintenance";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
@@ -36,6 +39,9 @@ const App = () => (
               <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>
                   <Route path="/garage" element={<Garage />} />
+                  <Route path="/garage/add" element={<AddMotorcycle />} />
+                  <Route path="/garage/edit/:id" element={<EditMotorcycle />} />
+                  <Route path="/garage/motorcycle/:id" element={<MotorcycleDetail />} />
                   <Route path="/maintenance" element={<Maintenance />} />
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/profile" element={<Profile />} />
