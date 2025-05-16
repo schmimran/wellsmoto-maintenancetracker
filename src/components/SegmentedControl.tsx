@@ -1,9 +1,10 @@
 
-import { useState } from "react";
+import { ReactNode } from "react";
 
 type SegmentOption = {
   value: string;
   label: string;
+  icon?: ReactNode;
 };
 
 type SegmentedControlProps = {
@@ -25,7 +26,10 @@ const SegmentedControl = ({ options, value, onChange }: SegmentedControlProps) =
               : "text-gray-500"
           }`}
         >
-          {option.label}
+          <div className="flex items-center justify-center gap-2">
+            {option.icon}
+            <span>{option.label}</span>
+          </div>
         </button>
       ))}
     </div>
