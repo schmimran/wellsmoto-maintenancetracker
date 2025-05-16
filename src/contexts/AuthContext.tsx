@@ -1,8 +1,7 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 
 type AuthContextType = {
@@ -22,6 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation(); // Get current location
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -31,10 +31,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         setIsLoading(false);
         
+        // Only navigate if there's a specific auth event (not just initial loading)
         if (event === 'SIGNED_IN' && session) {
-          navigate('/garage');
+          // Only navigate to /garage if we're not already there
+          if (location.pathname !== '/garage') {
+            navigate('/garage');
+          }
         } else if (event === 'SIGNED_OUT') {
-          navigate('/login');
+          // Only navigate to /login if we're not already there or on the welcome page
+          if (location.pathname !== '/login' && location.pathname !== '/') {
+            navigate('/login');
+          }
         }
       }
     );
@@ -44,12 +51,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
+      
+      // Initial navigation based on session status, but only if necessary
+      if (session && location.pathname !== '/garage' && 
+          !location.pathname.startsWith('/garage/') && 
+          location.pathname !== '/profile' && 
+          location.pathname !== '/maintenance' && 
+          location.pathname !== '/reports') {
+        navigate('/garage');
+      } else if (!session && location.pathname !== '/login' && 
+                 location.pathname !== '/' && 
+                 location.pathname !== '/signup') {
+        navigate('/login');
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const signIn = async (email: string, password: string, stayLoggedIn = false) => {
     try {
