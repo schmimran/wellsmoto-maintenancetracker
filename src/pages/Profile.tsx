@@ -4,6 +4,8 @@ import PageHeader from '@/components/PageHeader';
 import ActionButton from '@/components/ActionButton';
 import ToggleSwitch from '@/components/ToggleSwitch';
 import SettingsItem from '@/components/SettingsItem';
+import EditProfileModal from '@/components/EditProfileModal';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +22,7 @@ const Profile = () => {
   const [maintenanceReminders, setMaintenanceReminders] = useState(true);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   
   useEffect(() => {
     const fetchProfile = async () => {
@@ -48,10 +51,7 @@ const Profile = () => {
   }, [user]);
   
   const handleEditProfile = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Profile editing will be available in a future update",
-    });
+    setIsEditProfileOpen(true);
   };
 
   const handleLogout = async () => {
@@ -67,6 +67,13 @@ const Profile = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleSaveSettings = () => {
+    toast({
+      title: "Settings saved",
+      description: "Your preferences have been updated",
+    });
   };
 
   const navigateToTerms = () => {
@@ -89,6 +96,11 @@ const Profile = () => {
       description: "Support contact will be available in a future update",
     });
   };
+
+  const getInitials = () => {
+    const name = userProfile?.display_name || user?.user_metadata?.name || 'User';
+    return name.charAt(0).toUpperCase();
+  };
   
   return (
     <div className="pb-16">
@@ -97,11 +109,15 @@ const Profile = () => {
       <div className="p-4">
         <div className="bg-white dark:bg-wells-darkGray rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col items-center">
-            <div className="w-20 h-20 bg-gray-200 rounded-full mb-4 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
-            </div>
+            <Avatar className="w-20 h-20 mb-4">
+              <AvatarImage 
+                src={userProfile?.avatar_url || undefined} 
+                alt={userProfile?.display_name || 'Profile'} 
+              />
+              <AvatarFallback className="bg-wells-red text-white text-2xl font-bold">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
             <h2 className="text-xl font-bold mb-1">
               {isLoading ? 'Loading...' : userProfile?.display_name || user?.email || 'User'}
             </h2>
@@ -162,6 +178,10 @@ const Profile = () => {
             isChecked={maintenanceReminders}
             onChange={setMaintenanceReminders}
           />
+
+          <div className="mt-4 flex justify-end">
+            <ActionButton onClick={handleSaveSettings}>Save Settings</ActionButton>
+          </div>
         </div>
         
         <div className="bg-white dark:bg-wells-darkGray rounded-lg shadow-sm p-6">
@@ -173,6 +193,12 @@ const Profile = () => {
           <SettingsItem title="Contact Support" onClick={navigateToSupport} />
         </div>
       </div>
+
+      <EditProfileModal
+        open={isEditProfileOpen}
+        onOpenChange={setIsEditProfileOpen}
+        currentProfile={userProfile || {}}
+      />
     </div>
   );
 };

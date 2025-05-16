@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 type LogoProps = {
   size?: 'sm' | 'md' | 'lg';
@@ -8,6 +9,9 @@ type LogoProps = {
 };
 
 const Logo = ({ size = 'md', withText = false }: LogoProps) => {
+  const { user } = useAuth();
+  const targetPath = user ? '/garage' : '/';
+  
   const sizeStyles = {
     sm: 'w-8 h-8',
     md: 'w-12 h-12',
@@ -15,7 +19,7 @@ const Logo = ({ size = 'md', withText = false }: LogoProps) => {
   };
 
   return (
-    <Link to="/" className={`flex ${withText ? 'flex-col items-center' : ''}`}>
+    <Link to={targetPath} className={`flex ${withText ? 'flex-col items-center' : ''}`}>
       <div className={`${sizeStyles[size]} relative`}>
         <img 
           src="/lovable-uploads/8f03e4a2-6676-4a8f-9800-186ae355b255.png" 

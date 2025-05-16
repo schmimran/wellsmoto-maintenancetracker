@@ -9,9 +9,10 @@ type AuthContextType = {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, stayLoggedIn?: boolean) => Promise<void>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (data: { display_name?: string, email?: string, avatar_url?: string }) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,11 +51,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [navigate]);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, stayLoggedIn = false) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          persistSession: stayLoggedIn,
+        }
       });
       
       if (error) throw error;
@@ -94,6 +98,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const updateProfile = async (data: { display_name?: string, email?: string, avatar_url?: string }) => {
+    try {
+      if (!user) throw new Error('User not authenticated');
+
+      // Update email if provided
+      if (data.email && data.email !== user.email) {
+        const { error: emailError } = await supabase.auth.updateUser({ email: data.email });
+        if (emailError) throw emailError;
+      }
+
+      // Update profile data in profiles table
+      const updates = {
+        id: user.id,
+        updated_at: new Date().toISOString(),
+        ...data,
+      };
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .upsert(updates)
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      toast.success('Profile updated successfully!');
+    } catch (error: any) {
+      toast.error(error.message || 'Error updating profile');
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -103,6 +138,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signIn,
         signUp,
         signOut,
+        updateProfile,
       }}
     >
       {children}

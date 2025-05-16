@@ -7,6 +7,7 @@ import * as z from 'zod';
 import Logo from '@/components/Logo';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -20,6 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
   password: z.string().min(1, 'Password is required'),
+  stayLoggedIn: z.boolean().default(false),
 });
 
 const Login = () => {
@@ -31,13 +33,14 @@ const Login = () => {
     defaultValues: {
       email: '',
       password: '',
+      stayLoggedIn: false,
     },
   });
 
   const handleSubmit = async (values: z.infer<typeof loginSchema>) => {
     setIsSubmitting(true);
     try {
-      await signIn(values.email, values.password);
+      await signIn(values.email, values.password, values.stayLoggedIn);
     } catch (error) {
       console.error('Error during sign in:', error);
     } finally {
@@ -85,6 +88,24 @@ const Login = () => {
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="stayLoggedIn"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md pt-2">
+                    <FormControl>
+                      <Checkbox 
+                        checked={field.value} 
+                        onCheckedChange={field.onChange} 
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Stay logged in</FormLabel>
+                    </div>
                   </FormItem>
                 )}
               />
