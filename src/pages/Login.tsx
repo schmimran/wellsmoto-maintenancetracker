@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -25,8 +25,9 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
-  const { user, signIn } = useAuth();
+  const { user, isLoading, authInitialized, signIn } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const location = useLocation();
   
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -48,8 +49,12 @@ const Login = () => {
     }
   };
 
-  if (user) {
-    return <Navigate to="/garage" />;
+  // Only redirect to garage when we have a confirmed authenticated user
+  // and we're sure auth is initialized (not in loading state)
+  if (user && !isLoading && authInitialized) {
+    // Get the intended destination or default to /garage
+    const from = location.state?.from?.pathname || "/garage";
+    return <Navigate to={from} replace />;
   }
 
   return (
@@ -113,7 +118,7 @@ const Login = () => {
               <Button 
                 type="submit" 
                 className="w-full bg-wells-red hover:bg-wells-red/90 text-white"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isLoading}
               >
                 {isSubmitting ? 'Signing in...' : 'Sign In'}
               </Button>

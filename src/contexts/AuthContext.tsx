@@ -1,13 +1,18 @@
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 
+// Debug flag to track authentication flow
+const DEBUG_AUTH = false;
+
 type AuthContextType = {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
+  authInitialized: boolean; // Flag to track when initial auth check is complete
   signIn: (email: string, password: string, stayLoggedIn?: boolean) => Promise<void>;
   signUp: (email: string, password: string, displayName: string, eulaAccepted: boolean) => Promise<void>;
   signOut: () => Promise<void>;
@@ -20,56 +25,102 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
+  const debugLog = (...args: any[]) => {
+    if (DEBUG_AUTH) {
+      console.log('[AuthContext]', ...args);
+    }
+  };
+
+  // Handle navigation based on auth state
+  const handleAuthNavigation = (sessionData: Session | null, event?: string) => {
+    debugLog('handleAuthNavigation', { sessionData, event, pathname: location.pathname });
+
+    // Don't navigate if we're still loading
+    if (isLoading) return;
+    
+    // Only navigate if auth is initialized
+    if (!authInitialized) return;
+
+    // If user is authenticated
+    if (sessionData) {
+      // Public routes that should redirect to garage when logged in
+      const publicRoutes = ['/', '/login', '/signup'];
+      
+      if (publicRoutes.includes(location.pathname)) {
+        debugLog('Redirecting to /garage from public route');
+        setTimeout(() => navigate('/garage'), 10);
+      }
+    } 
+    // If user is not authenticated
+    else {
+      // Protected routes that should redirect to login when not logged in
+      const protectedRoutes = ['/garage', '/maintenance', '/reports', '/profile'];
+      
+      // Check if current path is a protected route
+      const isProtectedRoute = protectedRoutes.some(route => 
+        location.pathname === route || location.pathname.startsWith(`${route}/`)
+      );
+      
+      if (isProtectedRoute) {
+        debugLog('Redirecting to /login from protected route');
+        setTimeout(() => navigate('/login'), 10);
+      }
+    }
+  };
+
   useEffect(() => {
+    debugLog('Auth Provider initializing');
+    let mounted = true;
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
+      (event, sessionData) => {
+        debugLog('onAuthStateChange', { event, sessionData });
         
-        // Only navigate if there's a specific auth event (not just initial loading)
-        if (event === 'SIGNED_IN' && session) {
-          // Only navigate to /garage if we're not already there
-          if (location.pathname !== '/garage') {
-            navigate('/garage');
-          }
-        } else if (event === 'SIGNED_OUT') {
-          // Only navigate to /login if we're not already there or on the welcome page
-          if (location.pathname !== '/login' && location.pathname !== '/') {
-            navigate('/login');
-          }
+        if (!mounted) return;
+
+        setSession(sessionData);
+        setUser(sessionData?.user ?? null);
+        
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+          setIsLoading(false);
+          // Let handleAuthNavigation manage the navigation
+          handleAuthNavigation(sessionData, event);
         }
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
+    supabase.auth.getSession().then(({ data: { session: sessionData } }) => {
+      debugLog('getSession result', { sessionData });
       
-      // Initial navigation based on session status, but only if necessary
-      if (session && location.pathname !== '/garage' && 
-          !location.pathname.startsWith('/garage/') && 
-          location.pathname !== '/profile' && 
-          location.pathname !== '/maintenance' && 
-          location.pathname !== '/reports') {
-        navigate('/garage');
-      } else if (!session && location.pathname !== '/login' && 
-                 location.pathname !== '/' && 
-                 location.pathname !== '/signup') {
-        navigate('/login');
-      }
+      if (!mounted) return;
+
+      setSession(sessionData);
+      setUser(sessionData?.user ?? null);
+      setIsLoading(false);
+      setAuthInitialized(true);
+      
+      // Let handleAuthNavigation manage the navigation
+      handleAuthNavigation(sessionData);
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate, location.pathname]);
+  }, []);
+
+  // Watch for route changes and adjust navigation if needed
+  useEffect(() => {
+    if (authInitialized && !isLoading) {
+      handleAuthNavigation(session);
+    }
+  }, [location.pathname, authInitialized]);
 
   const signIn = async (email: string, password: string, stayLoggedIn = false) => {
     try {
@@ -172,6 +223,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         user,
         session,
         isLoading,
+        authInitialized, // Expose this flag to consumers
         signIn,
         signUp,
         signOut,

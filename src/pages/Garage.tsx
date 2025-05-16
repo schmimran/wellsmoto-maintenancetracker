@@ -1,15 +1,26 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bike } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import EmptyState from '@/components/EmptyState';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import SegmentedControl from '@/components/SegmentedControl';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Garage = () => {
   const [viewType, setViewType] = useState('cards');
   const [motorcycles, setMotorcycles] = useState<any[]>([]);
+  const { user, authInitialized } = useAuth();
+  const navigate = useNavigate();
+  
+  // Ensure we're authenticated when this page renders
+  useEffect(() => {
+    if (authInitialized && !user) {
+      navigate('/login');
+    }
+  }, [user, authInitialized]);
   
   const handleAddMotorcycle = () => {
     // For now just show a toast - in a real app this would open a form
