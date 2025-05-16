@@ -45,7 +45,7 @@ const Garage = () => {
       <div className="flex-1 flex items-center justify-center p-4">
         {motorcycles.length === 0 ? (
           <EmptyState
-            icon={<img src="/motorcycle-icon.png" alt="Motorcycle" className="w-24 h-24 opacity-50" />}
+            icon={<img src="/motorcycle-icon.png" alt="Motorcycle" className="w-149 h-113 opacity-50" />}
             title="Your garage is empty"
             description="Add your first motorcycle to get started"
           />
