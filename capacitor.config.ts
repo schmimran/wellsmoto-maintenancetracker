@@ -14,6 +14,15 @@ const config: CapacitorConfig = {
     allowsLinkPreview: true,
     scrollEnabled: true,
     backgroundColor: '#ffffff'
+  },
+  android: {
+    buildOptions: {
+      // Specify the Java version to use
+      minSdkVersion: 22,
+      targetSdkVersion: 33,
+      // Other build options
+      gradleArgs: ['-PcdvMinSdkVersion=22']
+    }
   }
 };
 

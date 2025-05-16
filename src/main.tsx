@@ -10,4 +10,5 @@ document.addEventListener('DOMContentLoaded', () => {
   setupKeyboard();
 });
 
+setupAndroidBackButton();
 createRoot(document.getElementById("root")!).render(<App />);
