@@ -17,6 +17,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
+import { Keyboard } from '@capacitor/keyboard';
+import { isNativePlatform } from '@/services/capacitor';
+import SafeArea from '@/components/SafeArea';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -38,7 +41,36 @@ const Login = () => {
     },
   });
 
+  // Setup keyboard handling for native platforms
+  useEffect(() => {
+    if (isNativePlatform) {
+      const setupNativeKeyboard = async () => {
+        await Keyboard.setAccessoryBarVisible({ isVisible: false });
+      };
+
+      setupNativeKeyboard();
+      
+      // Add keyboard avoidance listeners
+      const hideKeyboardOnTouch = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('input') && !target.closest('textarea')) {
+          Keyboard.hide();
+        }
+      };
+      
+      document.addEventListener('touchstart', hideKeyboardOnTouch);
+      
+      return () => {
+        document.removeEventListener('touchstart', hideKeyboardOnTouch);
+      };
+    }
+  }, []);
+
   const handleSubmit = async (values: z.infer<typeof loginSchema>) => {
+    if (isNativePlatform) {
+      Keyboard.hide();
+    }
+    
     setIsSubmitting(true);
     try {
       await signIn(values.email, values.password, values.stayLoggedIn);
@@ -58,7 +90,7 @@ const Login = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-black animate-fade-in">
+    <SafeArea all className="flex flex-col items-center justify-center min-h-screen bg-black animate-fade-in">
       <div className="flex flex-col items-center mb-8">
         <Logo size="lg" withText={true} />
       </div>
@@ -76,7 +108,13 @@ const Login = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="you@example.com" {...field} />
+                      <Input 
+                        placeholder="you@example.com" 
+                        {...field} 
+                        className="h-11 text-base" // Larger touch target
+                        autoComplete="email"
+                        inputMode="email"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -90,7 +128,13 @@ const Login = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input 
+                        type="password" 
+                        placeholder="••••••••" 
+                        {...field} 
+                        className="h-11 text-base" // Larger touch target
+                        autoComplete="current-password"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -106,10 +150,11 @@ const Login = () => {
                       <Checkbox 
                         checked={field.value} 
                         onCheckedChange={field.onChange} 
+                        className="h-5 w-5" // Larger touch target
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Stay logged in</FormLabel>
+                      <FormLabel className="text-base">Stay logged in</FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -117,7 +162,7 @@ const Login = () => {
               
               <Button 
                 type="submit" 
-                className="w-full bg-wells-red hover:bg-wells-red/90 text-white"
+                className="w-full bg-wells-red hover:bg-wells-red/90 text-white h-12 text-base" // Larger touch target
                 disabled={isSubmitting || isLoading}
               >
                 {isSubmitting ? 'Signing in...' : 'Sign In'}
@@ -127,13 +172,13 @@ const Login = () => {
           
           <div className="mt-4 text-center text-gray-600 dark:text-gray-300">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-wells-red hover:underline">
+            <Link to="/signup" className="text-wells-red hover:underline text-base">
               Create Account
             </Link>
           </div>
         </div>
       </div>
-    </div>
+    </SafeArea>
   );
 };
 

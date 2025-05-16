@@ -1,3 +1,4 @@
+
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -11,8 +12,6 @@ export const isNativePlatform = Capacitor.isNativePlatform();
 export const isIOS = Capacitor.getPlatform() === 'ios';
 export const isAndroid = Capacitor.getPlatform() === 'android';
 export const isWeb = !isNativePlatform;
-
-
 
 // Add Android-specific back button handling
 export const setupAndroidBackButton = () => {
@@ -33,7 +32,6 @@ export const setupAndroidBackButton = () => {
   }
 };
 
-
 // App lifecycle events
 export const addAppStateChangeListener = (callback: (isActive: boolean) => void) => {
   if (isNativePlatform) {
@@ -51,7 +49,30 @@ export const initializeNativeUI = async () => {
       
       if (isIOS) {
         await StatusBar.setStyle({ style: Style.Dark });
+        // Set status bar color based on theme
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+          StatusBar.setBackgroundColor({ color: '#1e1e1e' });
+        } else {
+          StatusBar.setBackgroundColor({ color: '#f5f5f7' });
+        }
+      } else if (isAndroid) {
+        // Set overlay true for Android to ensure content renders under status bar
+        await StatusBar.setOverlaysWebView({ overlay: true });
+        
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+          StatusBar.setBackgroundColor({ color: '#1e1e1e' });
+          StatusBar.setStyle({ style: Style.Dark });
+        } else {
+          StatusBar.setBackgroundColor({ color: '#f5f5f7' });
+          StatusBar.setStyle({ style: Style.Light });
+        }
       }
+      
+      // Ensure status bar is visible
+      await StatusBar.show();
+      
     } catch (error) {
       console.error('Error initializing native UI:', error);
     }
@@ -78,21 +99,25 @@ export const takePicture = async () => {
 
 // Storage wrappers
 export const storeData = async (key: string, value: any) => {
-  if (isNativePlatform) {
-    await Storage.set({
+  try {
+    await Preferences.set({
       key,
       value: typeof value === 'string' ? value : JSON.stringify(value)
     });
-  } else {
+  } catch (error) {
+    console.error('Error storing data:', error);
+    // Fallback to localStorage if Preferences fails
     localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
   }
 };
 
 export const getData = async (key: string) => {
-  if (isNativePlatform) {
-    const { value } = await Storage.get({ key });
+  try {
+    const { value } = await Preferences.get({ key });
     return value;
-  } else {
+  } catch (error) {
+    console.error('Error getting data:', error);
+    // Fallback to localStorage if Preferences fails
     return localStorage.getItem(key);
   }
 };
@@ -100,15 +125,32 @@ export const getData = async (key: string) => {
 // Keyboard management
 export const setupKeyboard = () => {
   if (isNativePlatform) {
-    Keyboard.setAccessoryBarVisible({ isVisible: false });
-    
-    // Auto-hide keyboard when touching outside input
-    document.addEventListener('touchstart', (e) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('input') && !target.closest('textarea')) {
-        Keyboard.hide();
-      }
-    });
+    try {
+      Keyboard.setAccessoryBarVisible({ isVisible: false });
+      
+      // Set up keyboard listeners
+      Keyboard.addListener('keyboardWillShow', (info) => {
+        // Add a CSS class to the body when keyboard is visible
+        document.body.classList.add('keyboard-visible');
+        document.body.style.setProperty('--keyboard-height', `${info.keyboardHeight}px`);
+      });
+      
+      Keyboard.addListener('keyboardWillHide', () => {
+        // Remove the CSS class when keyboard is hidden
+        document.body.classList.remove('keyboard-visible');
+        document.body.style.removeProperty('--keyboard-height');
+      });
+      
+      // Auto-hide keyboard when touching outside input
+      document.addEventListener('touchstart', (e) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('input') && !target.closest('textarea')) {
+          Keyboard.hide();
+        }
+      });
+    } catch (error) {
+      console.error('Error setting up keyboard:', error);
+    }
   }
 };
 
@@ -117,4 +159,3 @@ export const exitApp = () => {
     App.exitApp();
   }
 };
-

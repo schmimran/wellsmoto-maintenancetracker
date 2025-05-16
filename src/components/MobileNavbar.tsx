@@ -11,7 +11,7 @@ const MobileNavbar = () => {
   };
   
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-wells-darkGray border-t border-gray-200 dark:border-gray-800">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-wells-darkGray border-t border-gray-200 dark:border-gray-800 pb-safe">
       <div className="flex justify-around items-center h-16">
         <Link to="/garage" className={`flex flex-col items-center justify-center w-1/4 h-full ${isActive('/garage') ? 'text-wells-red' : 'text-gray-500'}`}>
           <Home size={24} />
