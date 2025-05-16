@@ -10,7 +10,7 @@ type AuthContextType = {
   session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string, stayLoggedIn?: boolean) => Promise<void>;
-  signUp: (email: string, password: string, displayName: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string, eulaAccepted: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: { display_name?: string, email?: string, avatar_url?: string }) => Promise<void>;
 };
@@ -68,14 +68,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signUp = async (email: string, password: string, displayName: string) => {
+  const signUp = async (email: string, password: string, displayName: string, eulaAccepted: boolean) => {
     try {
+      if (!eulaAccepted) {
+        throw new Error('You must accept the EULA to create an account.');
+      }
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             name: displayName,
+            eula_accepted: eulaAccepted,
+            eula_accepted_at: new Date().toISOString(),
           },
         },
       });

@@ -15,6 +15,8 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string | null
+          eula_accepted: boolean
+          eula_accepted_at: string | null
           id: string
           updated_at: string
         }
@@ -23,6 +25,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          eula_accepted?: boolean
+          eula_accepted_at?: string | null
           id: string
           updated_at?: string
         }
@@ -31,6 +35,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          eula_accepted?: boolean
+          eula_accepted_at?: string | null
           id?: string
           updated_at?: string
         }

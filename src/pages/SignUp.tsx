@@ -15,13 +15,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 
 const signupSchema = z.object({
   email: z.string().email('Please enter a valid email'),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  name: z.string().min(2, 'Display name must be at least 2 characters'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+  eulaAccepted: z.literal(true, {
+    errorMap: () => ({ message: "You must accept the EULA to create an account" }),
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -38,13 +42,14 @@ const SignUp = () => {
       name: '',
       password: '',
       confirmPassword: '',
+      eulaAccepted: false,
     },
   });
 
   const handleSubmit = async (values: z.infer<typeof signupSchema>) => {
     setIsSubmitting(true);
     try {
-      await signUp(values.email, values.password, values.name);
+      await signUp(values.email, values.password, values.name, values.eulaAccepted);
     } catch (error) {
       console.error('Error during sign up:', error);
     } finally {
@@ -87,9 +92,9 @@ const SignUp = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Display Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your name" {...field} />
+                      <Input placeholder="Your display name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -120,6 +125,30 @@ const SignUp = () => {
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="eulaAccepted"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        I accept the <Link to="#" className="text-wells-red hover:underline">End User License Agreement</Link>
+                      </FormLabel>
+                      <p className="text-xs text-gray-500">
+                        By accepting, you agree to allow us to access your saved data and share it with third parties.
+                      </p>
+                      <FormMessage />
+                    </div>
                   </FormItem>
                 )}
               />
