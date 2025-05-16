@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -74,13 +73,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string, stayLoggedIn = false) => {
     try {
-      // Properly configure session persistence based on stayLoggedIn parameter
+      // Fix: Merge all options into a single object parameter
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      }, {
-        // Pass the persistence option based on stayLoggedIn
         options: {
+          // Include the persistence option inside the main object
           persistSession: stayLoggedIn,
         }
       });
