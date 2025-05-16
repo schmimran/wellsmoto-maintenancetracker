@@ -4,6 +4,8 @@ import { User, Session } from '@supabase/supabase-js';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthContext } from '@/contexts/AuthContext';
+import { Preferences } from '@capacitor/preferences';
+
 import { 
   debugLog, 
   signInWithEmail, 
@@ -19,6 +21,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [authInitialized, setAuthInitialized] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Add this function to your existing AuthProvider component
+  const storeSession = async (session: Session | null) => {
+    if (session) {
+      await Preferences.set({
+        key: 'auth_session',
+        Value: session
+    });
+    } else {
+      await Preferences.set({
+        key: 'auth_session',
+        Value: session
+    });
+    }
+  };
+
 
   // Handle navigation based on auth state
   const handleAuthNavigation = (sessionData: Session | null, event?: string) => {
@@ -70,6 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setSession(sessionData);
         setUser(sessionData?.user ?? null);
+	storeSession(sessionData);
         
         if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
           setIsLoading(false);
