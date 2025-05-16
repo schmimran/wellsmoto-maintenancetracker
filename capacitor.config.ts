@@ -6,7 +6,14 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
+    iosScheme: 'https'
+  },
+  ios: {
+    contentInset: 'automatic',
+    allowsLinkPreview: true,
+    scrollEnabled: true,
+    backgroundColor: '#ffffff'
   },
   android: {
     buildOptions: {
