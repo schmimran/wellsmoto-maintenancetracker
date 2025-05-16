@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,7 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation(); // Get current location
+  const location = useLocation();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -73,12 +74,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string, stayLoggedIn = false) => {
     try {
-      // The issue is here - we need to correctly handle the stayLoggedIn option
-      // The signInWithPassword method doesn't accept persistSession in the options
-      // We can set this globally for the client if needed, but for now we'll just sign in
+      // Properly configure session persistence based on stayLoggedIn parameter
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+      }, {
+        // Pass the persistence option based on stayLoggedIn
+        options: {
+          persistSession: stayLoggedIn,
+        }
       });
       
       if (error) throw error;
@@ -118,6 +122,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      // Ensure we clear any state when signing out
+      setUser(null);
+      setSession(null);
+      
+      // Navigate to login page after sign out
+      navigate('/login');
     } catch (error: any) {
       toast.error(error.message || 'Error signing out');
       throw error;
