@@ -1,23 +1,72 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageHeader from '@/components/PageHeader';
 import ActionButton from '@/components/ActionButton';
 import ToggleSwitch from '@/components/ToggleSwitch';
 import SettingsItem from '@/components/SettingsItem';
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 const Profile = () => {
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [distanceUnit, setDistanceUnit] = useState('miles');
   const [darkMode, setDarkMode] = useState(false);
   const [maintenanceReminders, setMaintenanceReminders] = useState(true);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+        } else {
+          setUserProfile(data);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
   
   const handleEditProfile = () => {
     toast({
       title: "Coming Soon",
       description: "Profile editing will be available in a future update",
     });
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error logging out",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   const navigateToTerms = () => {
@@ -53,9 +102,20 @@ const Profile = () => {
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold mb-1">Guest User</h2>
-            <p className="text-gray-500 mb-4">guest@example.com</p>
-            <ActionButton onClick={handleEditProfile}>Edit Profile</ActionButton>
+            <h2 className="text-xl font-bold mb-1">
+              {isLoading ? 'Loading...' : userProfile?.display_name || user?.email || 'User'}
+            </h2>
+            <p className="text-gray-500 mb-4">{user?.email || 'No email available'}</p>
+            <div className="flex flex-col space-y-2 w-full max-w-xs">
+              <ActionButton onClick={handleEditProfile}>Edit Profile</ActionButton>
+              <ActionButton 
+                onClick={handleLogout}
+                variant="outline"
+                className="border-wells-red text-wells-red hover:bg-wells-red/10"
+              >
+                Sign Out
+              </ActionButton>
+            </div>
           </div>
         </div>
         
