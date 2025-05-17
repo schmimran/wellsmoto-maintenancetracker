@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -27,16 +26,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (session) {
       await Preferences.set({
         key: 'auth_session',
-        Value: session
-    });
+        value: JSON.stringify(session)
+      });
     } else {
       await Preferences.set({
         key: 'auth_session',
-        Value: session
-    });
+        value: null
+      });
     }
   };
-
 
   // Handle navigation based on auth state
   const handleAuthNavigation = (sessionData: Session | null, event?: string) => {
@@ -88,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setSession(sessionData);
         setUser(sessionData?.user ?? null);
-	storeSession(sessionData);
+        storeSession(sessionData);
         
         if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
           setIsLoading(false);
