@@ -146,6 +146,7 @@
 .app-main {
   flex-grow: 1;
   padding-bottom: calc(70px + var(--safe-area-bottom)); /* Space for mobile nav plus safe area */
+  overflow-y: auto;
 }
 
 @layer utilities {

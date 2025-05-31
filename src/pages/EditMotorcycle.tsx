@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Motorcycle } from '@/types/motorcycle';
-import PageHeader from '@/components/PageHeader';
 import MotorcycleForm from '@/components/motorcycle/MotorcycleForm';
 
 const EditMotorcycle = () => {
@@ -56,16 +54,8 @@ const EditMotorcycle = () => {
   }
   
   return (
-    <div className="pb-16">
-      <PageHeader 
-        title="Edit Motorcycle"
-        showBackButton
-        onBackButtonClick={() => navigate(`/garage/motorcycle/${id}`)}
-      />
-      
-      <div className="p-4">
-        <MotorcycleForm existingMotorcycle={motorcycle} />
-      </div>
+    <div className="p-4">
+      <MotorcycleForm existingMotorcycle={motorcycle} />
     </div>
   );
 };

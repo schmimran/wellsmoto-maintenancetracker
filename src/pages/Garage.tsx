@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from 'react';
 import { Bike, Grid2x2, List } from 'lucide-react';
-import PageHeader from '@/components/PageHeader';
 import EmptyState from '@/components/EmptyState';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import SegmentedControl from '@/components/SegmentedControl';
@@ -74,9 +72,7 @@ const Garage = () => {
   };
   
   return (
-    <div className="pb-16">
-      <PageHeader title="My Garage" />
-      
+    <div>
       <div className="p-4">
         <SegmentedControl 
           options={[
