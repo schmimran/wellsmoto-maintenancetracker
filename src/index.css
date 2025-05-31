@@ -79,7 +79,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-wells-gray text-foreground;
+    @apply bg-background text-foreground;
   }
   
   /* Mobile experience first */
