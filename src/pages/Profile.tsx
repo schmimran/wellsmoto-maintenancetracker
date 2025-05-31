@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import ActionButton from '@/components/ActionButton';
 import ToggleSwitch from '@/components/ToggleSwitch';
@@ -20,34 +21,42 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
+  const fetchProfile = async () => {
+    if (!user) return;
 
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-        if (error) {
-          console.error('Error fetching profile:', error);
-        } else {
-          setUserProfile(data);
-        }
-      } catch (error) {
+      if (error) {
         console.error('Error fetching profile:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        setUserProfile(data);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProfile();
   }, [user]);
   
   const handleEditProfile = () => {
     setIsEditProfileOpen(true);
+  };
+
+  const handleEditProfileClose = (updated: boolean) => {
+    setIsEditProfileOpen(false);
+    if (updated) {
+      // Refresh profile data after successful edit
+      fetchProfile();
+    }
   };
 
   const handleLogout = async () => {
@@ -59,28 +68,6 @@ const Profile = () => {
     } catch (error) {
       toast({
         title: "Error logging out",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    try {
-      await updatePreferences({
-        notifications: preferences.notifications,
-        distanceUnit: preferences.distanceUnit,
-        darkMode: preferences.darkMode,
-        maintenanceReminders: preferences.maintenanceReminders
-      });
-      
-      toast({
-        title: "Settings saved",
-        description: "Your preferences have been updated",
-      });
-    } catch (error) {
-      toast({
-        title: "Error saving settings",
         description: "Please try again",
         variant: "destructive",
       });
@@ -186,10 +173,6 @@ const Profile = () => {
           isChecked={preferences.maintenanceReminders}
           onChange={(checked) => updatePreferences({ maintenanceReminders: checked })}
         />
-
-        <div className="mt-4 flex justify-end">
-          <ActionButton onClick={handleSaveSettings}>Save Settings</ActionButton>
-        </div>
       </div>
       
       <div className="bg-white dark:bg-wells-darkGray rounded-lg shadow-sm p-6">
@@ -203,7 +186,7 @@ const Profile = () => {
 
       <EditProfileModal
         open={isEditProfileOpen}
-        onOpenChange={setIsEditProfileOpen}
+        onOpenChange={handleEditProfileClose}
         currentProfile={userProfile || {}}
       />
     </div>

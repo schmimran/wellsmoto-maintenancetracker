@@ -90,7 +90,7 @@ const Login = () => {
   }
 
   return (
-    <SafeArea all className="flex flex-col items-center justify-center min-h-screen bg-black animate-fade-in">
+    <SafeArea all className="flex flex-col items-center justify-center min-h-screen bg-wells-slateBlue animate-fade-in">
       <div className="flex flex-col items-center mb-8">
         <Logo size="lg" withText={true} />
       </div>

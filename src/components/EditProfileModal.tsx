@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,7 @@ const profileSchema = z.object({
 
 type EditProfileModalProps = {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (open: boolean | ((updated: boolean) => void)) => void;
   currentProfile: {
     display_name?: string | null;
     email?: string | null;
@@ -33,7 +33,7 @@ type EditProfileModalProps = {
 };
 
 const EditProfileModal = ({ open, onOpenChange, currentProfile }: EditProfileModalProps) => {
-  const { updateProfile } = useAuth();
+  const { updateProfile, user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(currentProfile.avatar_url || null);
   
@@ -41,9 +41,20 @@ const EditProfileModal = ({ open, onOpenChange, currentProfile }: EditProfileMod
     resolver: zodResolver(profileSchema),
     defaultValues: {
       display_name: currentProfile.display_name || '',
-      email: currentProfile.email || '',
+      email: currentProfile.email || user?.email || '',
     },
   });
+
+  // Reset form values when modal opens or currentProfile changes
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        display_name: currentProfile.display_name || '',
+        email: currentProfile.email || user?.email || '',
+      });
+      setAvatarUrl(currentProfile.avatar_url || null);
+    }
+  }, [open, currentProfile, user?.email, form]);
   
   const handleAvatarUpload = (url: string) => {
     setAvatarUrl(url);
@@ -57,16 +68,26 @@ const EditProfileModal = ({ open, onOpenChange, currentProfile }: EditProfileMod
         email: values.email,
         avatar_url: avatarUrl || undefined,
       });
-      onOpenChange(false);
+      
+      // Close modal and indicate successful update
+      if (typeof onOpenChange === 'function') {
+        onOpenChange(true); // Pass true to indicate update occurred
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleClose = () => {
+    if (typeof onOpenChange === 'function') {
+      onOpenChange(false); // Pass false to indicate no update
+    }
+  };
   
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">Edit Profile</DialogTitle>
@@ -112,7 +133,7 @@ const EditProfileModal = ({ open, onOpenChange, currentProfile }: EditProfileMod
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => onOpenChange(false)}
+                  onClick={handleClose}
                 >
                   Cancel
                 </Button>

@@ -56,6 +56,7 @@ export default {
         wells: {
           red: "#f04937",
           darkBlue: "#1e2938",
+          slateBlue: "#334155",
           darkGray: "#1e1e1e",
           gray: "#f5f5f7",
           lightGray: "#e5e5ea",

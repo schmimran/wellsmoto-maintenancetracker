@@ -16,7 +16,7 @@ const Welcome = () => {
   }, [navigate]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-wells-darkBlue animate-fade-in">
+    <div className="flex flex-col items-center justify-center h-screen bg-wells-slateBlue animate-fade-in">
       <div className="flex flex-col items-center">
         <Logo size="lg" withText={true} />
       </div>

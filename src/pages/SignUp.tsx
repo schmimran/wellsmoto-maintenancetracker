@@ -18,7 +18,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 
-// The issue is in the schema definition - we need to use boolean() with refine instead of literal(true)
 const signupSchema = z.object({
   email: z.string().email('Please enter a valid email'),
   name: z.string().min(2, 'Display name must be at least 2 characters'),
@@ -26,6 +25,9 @@ const signupSchema = z.object({
   confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
   eulaAccepted: z.boolean().refine(val => val === true, {
     message: "You must accept the EULA to create an account",
+  }),
+  ageVerified: z.boolean().refine(val => val === true, {
+    message: "You must be 13 years of age or older to create an account",
   }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
@@ -43,7 +45,8 @@ const SignUp = () => {
       name: '',
       password: '',
       confirmPassword: '',
-      eulaAccepted: false, // This is okay now with our updated schema
+      eulaAccepted: false,
+      ageVerified: false,
     },
   });
 
@@ -63,7 +66,7 @@ const SignUp = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-black animate-fade-in">
+    <div className="flex flex-col items-center justify-center h-screen bg-wells-slateBlue animate-fade-in">
       <div className="flex flex-col items-center mb-8">
         <Logo size="lg" withText={true} />
       </div>
@@ -143,11 +146,29 @@ const SignUp = () => {
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>
-                        I accept the <Link to="#" className="text-wells-red hover:underline">End User License Agreement</Link>
+                        I accept the <Link to="/eula" className="text-wells-red hover:underline">End User License Agreement</Link>
                       </FormLabel>
-                      <p className="text-xs text-gray-500">
-                        By accepting, you agree to allow us to access your saved data and share it with third parties.
-                      </p>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="ageVerified"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        I confirm that I am 13 years of age or older
+                      </FormLabel>
                       <FormMessage />
                     </div>
                   </FormItem>

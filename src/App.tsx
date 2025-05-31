@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import Eula from "./pages/Eula";
 import Garage from "./pages/Garage";
 import AddMotorcycle from "./pages/AddMotorcycle";
 import EditMotorcycle from "./pages/EditMotorcycle";
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/" element={<Welcome />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/eula" element={<Eula />} />
               
               {/* Protected app routes */}
               <Route element={<ProtectedRoute />}>
